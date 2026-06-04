@@ -8,6 +8,9 @@ import io.restassured.RestAssured;
 import io.restassured.path.json.JsonPath;
 import io.restassured.path.xml.XmlPath;
 import io.restassured.path.xml.element.NodeChildren;
+import io.restassured.response.ExtractableResponse;
+import io.restassured.response.Response;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -245,7 +248,7 @@ public class UpdateVersionsTest {
                     "body" : "`update-versions` failed in %s :\\n\\n```\\n%s\\n```"
                 }
                 """.formatted(workflowRunUrl, st);
-        RestAssured.given()
+        ExtractableResponse<Response> response = RestAssured.given()
                 .contentType("application/json")
                 .accept("application/vnd.github+json")
                 .header("Authorization", "Bearer " + ghToken)
@@ -253,7 +256,10 @@ public class UpdateVersionsTest {
                 .body(body)
                 .post("https://api.github.com/repos/" + ghRepository + "/issues/" + issueId + "/comments")
                 .then()
-                .statusCode(201);
+                .extract();
+        if (response.statusCode() != 201) {
+            throw new IllegalStateException("Could not comment on issue #" + issueId +": "+ response.statusLine() + " " + response.body().asString());
+        }
 
         /* Open the issue if needed */
         RestAssured.given()
