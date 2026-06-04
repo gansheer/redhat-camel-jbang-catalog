@@ -222,9 +222,8 @@ public class UpdateVersionsTest {
         Assertions.assertThat(BRANCH_PATTERN.matcher("1.2").matches()).isFalse();
     }
 
-    static void reportFailure(Exception e, String ghRepository, String issueId, String workflowRunUrl, String ghToken) {
+    static void reportFailure(Exception e, String ghRepository, String issueId, String workflowRunUrl, String ghToken) throws Exception {
 
-        log.error(e.getMessage(), e);
         if (ghToken == null) {
             throw new IllegalStateException("GITHUB_TOKEN must be set to report the build failure in #" + issueId);
         }
@@ -248,7 +247,6 @@ public class UpdateVersionsTest {
                     "body" : "`update-versions` failed in %s :\\n\\n```\\n%s\\n```"
                 }
                 """.formatted(workflowRunUrl, st);
-        log.info("Sending body ={}=", body);
         ExtractableResponse<Response> response = RestAssured.given()
                 .contentType("application/json")
                 .accept("application/vnd.github+json")
@@ -276,6 +274,9 @@ public class UpdateVersionsTest {
                 .patch("https://api.github.com/repos/" + ghRepository + "/issues/" + issueId)
                 .then()
                 .statusCode(200);
+
+        // make the job fail
+        throw e;
     }
 
     static Map<String, String> fetchBranches(Git git, String remoteUrl, String remoteAlias, CredentialsProvider creds)
