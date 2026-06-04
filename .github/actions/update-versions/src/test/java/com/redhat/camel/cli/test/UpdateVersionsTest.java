@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
@@ -54,11 +53,12 @@ public class UpdateVersionsTest {
 
     private static final Pattern BRANCH_PATTERN = Pattern.compile("[0-9]+\\.[0-9]+\\.(?:x|[0-9]+)");
     private static final Pattern JAVA_OPTIONS_PATTERN = Pattern.compile("\n//[ \t]*JAVA_OPTIONS[ \t]+(.*)(\r?\n)");
+    private static final Pattern REPOS_PATTERN = Pattern.compile("\n//[ \t]*REPOS[ \t]+(.*)(\r?\n)");
     private static final Pattern CAMEL_BOM_VERSION_PATTERN = Pattern
             .compile("\\Qorg.apache.camel:camel-bom:${camel.jbang.version:\\E([^}]+)\\Q}@pom\\E");
 
     @Test
-    void update() {
+    void update() throws Exception {
 
         /* Input parameters */
         final boolean localTest = Boolean.parseBoolean(System.getenv("LOCAL_TEST"));
@@ -145,22 +145,20 @@ public class UpdateVersionsTest {
                     newProps.put("-Dcamel.jbang.quarkusVersion", platformVersion);
                     final String newSource = edit(oldSource, newProps);
                     final boolean sourceChanged = !newSource.equals(oldSource);
-                    if (sourceChanged || localTest) {
-                        if (sourceChanged && !localTest) {
-                            Files.writeString(camelJBangJavaPath, newSource, StandardCharsets.UTF_8);
-                            git.add().addFilepattern("CamelJBang.java").call();
-                            final String msg = "Upgrade to RHBQ Platform " + platformVersion;
-                            log.info("git: {}", msg);
-                            git.commit()
-                                    .setAuthor("Camel JBang Catalog Autoupdater", "autoupdater@localhost")
-                                    .setMessage(msg)
-                                    .call();
-                        }
+                    if (sourceChanged) {
+                        Files.writeString(camelJBangJavaPath, newSource, StandardCharsets.UTF_8);
+                        git.add().addFilepattern("CamelJBang.java").call();
+                        final String msg = "Upgrade to RHBQ Platform " + platformVersion;
+                        log.info("git: {}", msg);
+                        git.commit()
+                                .setAuthor("Camel JBang Catalog Autoupdater", "autoupdater@localhost")
+                                .setMessage(msg)
+                                .call();
 
                         // verify that everything works as expected after updating the version
                         testExport(checkoutDir, platformVersion);
 
-                        if (sourceChanged && !localTest) {
+                        if (!localTest) {
                             git.push()
                                     .setRemote(remoteAlias)
                                     .add(branch)
@@ -168,7 +166,7 @@ public class UpdateVersionsTest {
                                     .call();
                         }
                     } else {
-                        log.info("No change in CamelJBang.java in branch {} (nor in test mode)", branch);
+                        log.info("No change in CamelJBang.java in branch {}", branch);
                     }
                 }
             }
@@ -188,6 +186,9 @@ public class UpdateVersionsTest {
                         .statusCode(200);
             }
         } catch (Exception e) {
+            if (localTest) {
+                throw e;
+            }
             reportFailure(e, ghRepository, issueId, workflowRunUrl, ghToken);
         }
     }
@@ -206,50 +207,51 @@ public class UpdateVersionsTest {
     static void reportFailure(Exception e, String ghRepository, String issueId, String workflowRunUrl, String ghToken) {
 
         log.error(e.getMessage(), e);
-
-        if (ghToken != null) {
-            final Writer stackTrace = new StringWriter();
-            try (PrintWriter pw = new PrintWriter(stackTrace)) {
-                e.printStackTrace(pw);
-            }
-
-            /* Add comment */
-            String st = stackTrace.toString()
-                    .replace("\"", "\\\"")
-                    .replace("\\", "\\\\")
-                    .replace("\n", "\\n")
-                    .replace("\t", "\\t");
-            if (st.length() > 65000) {
-                st = st.substring(0, 65000);
-            }
-            final String body = """
-                    {
-                        "body" : "`update-versions` failed in %s :\\n\\n```\\n%s\\n```"
-                    }
-                    """.formatted(workflowRunUrl, st);
-            RestAssured.given()
-                    .accept("application/vnd.github+json")
-                    .header("Authorization", "Bearer " + ghToken)
-                    .header("X-GitHub-Api-Version", "2022-11-28")
-                    .body(body)
-                    .post("https://api.github.com/repos/" + ghRepository + "/issues/" + issueId + "/comments")
-                    .then()
-                    .statusCode(201);
-
-            /* Open the issue if needed */
-            RestAssured.given()
-                    .accept("application/vnd.github+json")
-                    .header("Authorization", "Bearer " + ghToken)
-                    .header("X-GitHub-Api-Version", "2022-11-28")
-                    .body("""
-                            {
-                                "state":"open"
-                            }
-                            """)
-                    .patch("https://api.github.com/repos/" + ghRepository + "/issues/" + issueId)
-                    .then()
-                    .statusCode(200);
+        if (ghToken == null) {
+            throw new IllegalStateException("GITHUB_TOKEN must be set to report the build failure in #" + issueId);
         }
+
+        final Writer stackTrace = new StringWriter();
+        try (PrintWriter pw = new PrintWriter(stackTrace)) {
+            e.printStackTrace(pw);
+        }
+
+        /* Add comment */
+        String st = stackTrace.toString()
+                .replace("\"", "\\\"")
+                .replace("\\", "\\\\")
+                .replace("\n", "\\n")
+                .replace("\t", "\\t");
+        if (st.length() > 65000) {
+            st = st.substring(0, 65000);
+        }
+        final String body = """
+                {
+                    "body" : "`update-versions` failed in %s :\\n\\n```\\n%s\\n```"
+                }
+                """.formatted(workflowRunUrl, st);
+        RestAssured.given()
+                .accept("application/vnd.github+json")
+                .header("Authorization", "Bearer " + ghToken)
+                .header("X-GitHub-Api-Version", "2022-11-28")
+                .body(body)
+                .post("https://api.github.com/repos/" + ghRepository + "/issues/" + issueId + "/comments")
+                .then()
+                .statusCode(201);
+
+        /* Open the issue if needed */
+        RestAssured.given()
+                .accept("application/vnd.github+json")
+                .header("Authorization", "Bearer " + ghToken)
+                .header("X-GitHub-Api-Version", "2022-11-28")
+                .body("""
+                        {
+                            "state":"open"
+                        }
+                        """)
+                .patch("https://api.github.com/repos/" + ghRepository + "/issues/" + issueId)
+                .then()
+                .statusCode(200);
     }
 
     static Map<String, String> fetchBranches(Git git, String remoteUrl, String remoteAlias, CredentialsProvider creds)
@@ -314,21 +316,13 @@ public class UpdateVersionsTest {
 
                                     final NodeChildren deps = xmlPath
                                             .get("project.dependencyManagement.dependencies.dependency");
-                                    final Optional<String> camelVersionOpt = deps.list().stream()
-                                            .map(n -> {
-                                                String groupId = n.getNode("groupId").value();
-                                                String artifactId = n.getNode("artifactId").value();
-                                                if ("org.apache.camel".equals(groupId) && "camel-direct".equals(artifactId)) {
-                                                    return n.getNode("version").value();
-                                                }
-                                                return null;
-                                            })
-                                            .filter(Objects::nonNull)
-                                            .findFirst();
-                                    if (camelVersionOpt.isEmpty()) {
-                                        throw new IllegalStateException("org.apache.camel:camel-direct not found in " + url);
-                                    }
-                                    final String camelVersion = camelVersionOpt.get();
+                                    final String camelVersion = deps.list().stream()
+                                            .filter(n -> "org.apache.camel".equals(n.getNode("groupId").value())
+                                                    && "camel-direct".equals(n.getNode("artifactId").value()))
+                                            .map(n -> n.getNode("version").value())
+                                            .findFirst()
+                                            .orElseThrow(() -> new IllegalStateException(
+                                                    "org.apache.camel:camel-direct not found in " + url));
                                     final ComparableVersion comparableCamelVersion = new ComparableVersion(camelVersion);
                                     if (minimalCamelVersion.compareTo(comparableCamelVersion) > 0) {
                                         log.info("Skipping Camel version {} in {}", camelVersion, ceqBomGav);
@@ -352,7 +346,6 @@ public class UpdateVersionsTest {
                 }
             }
         }
-
         return Collections.unmodifiableMap(result);
     }
 
@@ -367,26 +360,40 @@ public class UpdateVersionsTest {
                 oldProps.put(kv[0], kv.length == 1 ? null : kv[1]);
             }
             oldProps.putAll(props);
-            StringBuilder replacementBuilder = new StringBuilder("\n//JAVA_OPTIONS ");
-
-            oldProps.forEach((key, value) -> {
-                if (replacementBuilder.charAt(replacementBuilder.length() - 1) != ' ') {
-                    replacementBuilder.append(' ');
-                }
-                replacementBuilder.append(key).append("=").append(value);
-            });
-            replacementBuilder.append(m.group(2));
-
-            final String replacement = replacementBuilder.toString();
+            String eol = m.group(2);
+            final String replacement = eol + serializeProperties(oldProps, eol);
             if (javaOpts.equals(replacement)) {
                 return oldSource;
             }
             m.appendReplacement(sb, replacement);
+            m.appendTail(sb);
+            return sb.toString();
         } else {
-            throw new IllegalStateException("Could not find " + JAVA_OPTIONS_PATTERN.pattern() + " in CamelJBang.java");
+            /* JAVA_OPTIONS not available yet - add them using  */
+            Matcher reposM = REPOS_PATTERN.matcher(oldSource);
+            if (reposM.find()) {
+                String eol = reposM.group(2);
+                String javaOpts = serializeProperties(props, eol);
+                log.info("Adding " + javaOpts + " to CamelJBang.java");
+                reposM.appendReplacement(sb, reposM.group() + javaOpts);
+                reposM.appendTail(sb);
+                return sb.toString();
+            }
+            throw new IllegalStateException("Could not find " + REPOS_PATTERN.pattern() + " in CamelJBang.java");
         }
-        m.appendTail(sb);
-        return sb.toString();
+    }
+
+    private static String serializeProperties(final Map<String, String> props, String eol) {
+        StringBuilder replacementBuilder = new StringBuilder("//JAVA_OPTIONS ");
+
+        props.forEach((key, value) -> {
+            if (replacementBuilder.charAt(replacementBuilder.length() - 1) != ' ') {
+                replacementBuilder.append(' ');
+            }
+            replacementBuilder.append(key).append("=").append(value);
+        });
+        replacementBuilder.append(eol);
+        return replacementBuilder.toString();
     }
 
     static String toUrl(String url, String groupId, String artifactId, String version, String type) {
