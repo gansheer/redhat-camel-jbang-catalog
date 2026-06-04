@@ -43,6 +43,8 @@ import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.transport.CredentialItem;
 import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.FetchResult;
+import org.eclipse.jgit.transport.PushResult;
+import org.eclipse.jgit.transport.RemoteRefUpdate;
 import org.eclipse.jgit.transport.URIish;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -160,11 +162,16 @@ public class UpdateVersionsTest {
 
                         if (!localTest) {
                             log.info("Pushing branch {} to {}", branch, remoteUrl);
-                            git.push()
+                            Iterable<PushResult> results = git.push()
                                     .setRemote(remoteAlias)
                                     .add(branch)
                                     .setCredentialsProvider(creds)
                                     .call();
+                            for (PushResult r : results) {
+                                for (RemoteRefUpdate u : r.getRemoteUpdates()) {
+                                    log.info("Push result "+ u);
+                                }
+                            }
                         } else {
                             log.info("Skipping in test mode: push branch {} to {}", branch, remoteUrl);
                         }
