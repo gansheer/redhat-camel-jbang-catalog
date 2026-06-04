@@ -45,6 +45,7 @@ import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.FetchResult;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RemoteRefUpdate;
+import org.eclipse.jgit.transport.RemoteRefUpdate.Status;
 import org.eclipse.jgit.transport.URIish;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -58,7 +59,7 @@ public class UpdateVersionsTest {
     private static final Pattern REPOS_PATTERN = Pattern.compile("\n//[ \t]*REPOS[ \t]+(.*)(\r?\n)");
     private static final Pattern CAMEL_BOM_VERSION_PATTERN = Pattern
             .compile("\\Qorg.apache.camel:camel-bom:${camel.jbang.version:\\E([^}]+)\\Q}@pom\\E");
-
+    private static String GH_API_VERSION = "2026-03-10";
     @Test
     void update() throws Exception {
 
@@ -169,7 +170,10 @@ public class UpdateVersionsTest {
                                     .call();
                             for (PushResult r : results) {
                                 for (RemoteRefUpdate u : r.getRemoteUpdates()) {
-                                    log.info("Push result "+ u);
+                                    log.info("Push result " + u);
+                                    if (u.getStatus() != Status.UP_TO_DATE && u.getStatus() != Status.OK) {
+                                        throw new IllegalStateException("Could not push branch " + branch + " to " + remoteUrl + ": " + u);
+                                    }
                                 }
                             }
                         } else {
@@ -183,9 +187,10 @@ public class UpdateVersionsTest {
             /* Close if needed */
             if (ghToken != null) {
                 RestAssured.given()
+                        .contentType("application/json")
                         .accept("application/vnd.github+json")
                         .header("Authorization", "Bearer " + ghToken)
-                        .header("X-GitHub-Api-Version", "2022-11-28")
+                        .header("X-GitHub-Api-Version", GH_API_VERSION)
                         .body("""
                                 {
                                     "state":"closed"
@@ -241,9 +246,10 @@ public class UpdateVersionsTest {
                 }
                 """.formatted(workflowRunUrl, st);
         RestAssured.given()
+                .contentType("application/json")
                 .accept("application/vnd.github+json")
                 .header("Authorization", "Bearer " + ghToken)
-                .header("X-GitHub-Api-Version", "2022-11-28")
+                .header("X-GitHub-Api-Version", GH_API_VERSION)
                 .body(body)
                 .post("https://api.github.com/repos/" + ghRepository + "/issues/" + issueId + "/comments")
                 .then()
@@ -251,9 +257,10 @@ public class UpdateVersionsTest {
 
         /* Open the issue if needed */
         RestAssured.given()
+                .contentType("application/json")
                 .accept("application/vnd.github+json")
                 .header("Authorization", "Bearer " + ghToken)
-                .header("X-GitHub-Api-Version", "2022-11-28")
+                .header("X-GitHub-Api-Version", GH_API_VERSION)
                 .body("""
                         {
                             "state":"open"
