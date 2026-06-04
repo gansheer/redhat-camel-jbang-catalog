@@ -159,11 +159,14 @@ public class UpdateVersionsTest {
                         testExport(checkoutDir, platformVersion);
 
                         if (!localTest) {
+                            log.info("Pushing branch {} to {}", branch, remoteUrl);
                             git.push()
                                     .setRemote(remoteAlias)
                                     .add(branch)
                                     .setCredentialsProvider(creds)
                                     .call();
+                        } else {
+                            log.info("Skipping in test mode: push branch {} to {}", branch, remoteUrl);
                         }
                     } else {
                         log.info("No change in CamelJBang.java in branch {}", branch);
