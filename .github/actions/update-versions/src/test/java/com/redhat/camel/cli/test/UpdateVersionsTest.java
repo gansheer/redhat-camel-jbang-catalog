@@ -241,13 +241,14 @@ public class UpdateVersionsTest {
                 .replace("\n", "\\n")
                 .replace("\t", "\\t");
         if (st.length() > 65000) {
-            st = st.substring(0, 65000);
+            st = st.substring(0, 65000).replace("\"", "\\\"");
         }
         final String body = """
                 {
                     "body" : "`update-versions` failed in %s :\\n\\n```\\n%s\\n```"
                 }
                 """.formatted(workflowRunUrl, st);
+        log.info("Sending body ={}=", body);
         ExtractableResponse<Response> response = RestAssured.given()
                 .contentType("application/json")
                 .accept("application/vnd.github+json")
