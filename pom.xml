@@ -28,7 +28,7 @@
 
     <groupId>com.redhat.camel</groupId>
     <artifactId>jbang-catalog</artifactId>
-    <version>4.14.1.redhat-00009</version>
+    <version>4.14.4.redhat-00009</version>
     <packaging>pom</packaging>
 
     <name>Red Hat JBang Catalog</name>
@@ -61,10 +61,10 @@
         <!-- unify the encoding for all the modules -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <camel-version>4.14.1.redhat-00011</camel-version>
-        <camel-community-version>4.14.1</camel-community-version>
-        <camel-spring-boot-version>4.14.1.redhat-00011</camel-spring-boot-version>
-        <camel-kamelets-version>4.14.1.redhat-00010</camel-kamelets-version>
+        <camel-version>4.14.4.redhat-00008</camel-version>
+        <camel-community-version>4.14.4</camel-community-version>
+        <camel-spring-boot-version>4.14.4.redhat-00010</camel-spring-boot-version>
+        <camel-kamelets-version>4.14.4.redhat-00008</camel-kamelets-version>
     </properties>
 
     <dependencyManagement>
@@ -98,5 +98,9 @@
 
 </project>
 <!--
+<<<<<<< HEAD
 Modified by POM Manipulation Extension for Maven 4.22 ( SHA: 37322da5 )
+=======
+Modified by POM Manipulation Extension for Maven 5.1 ( SHA: 79a479f1 )
+>>>>>>> 4.14.4
 -->
