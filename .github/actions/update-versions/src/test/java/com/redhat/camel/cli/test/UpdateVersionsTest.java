@@ -236,12 +236,12 @@ public class UpdateVersionsTest {
 
         /* Add comment */
         String st = stackTrace.toString()
-                .replace("\"", "\\\"")
                 .replace("\\", "\\\\")
+                .replace("\"", "\\\"")
                 .replace("\n", "\\n")
                 .replace("\t", "\\t");
         if (st.length() > 65000) {
-            st = st.substring(0, 65000).replace("\"", "\\\"");
+            st = st.substring(0, 65000);
         }
         final String body = """
                 {

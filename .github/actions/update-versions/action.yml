@@ -26,6 +26,7 @@ runs:
       with:
         distribution: temurin
         java-version: 25
+        cache: maven
 
     - name: Setup JBang
       uses: jbangdev/setup-jbang@v0.1.1
