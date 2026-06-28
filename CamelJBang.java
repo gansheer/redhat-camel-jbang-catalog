@@ -22,7 +22,7 @@
 //JAVA_OPTIONS -Dcamel.jbang.camelSpringBootVersion=4.18.1.redhat-00026
 //DEPS org.apache.camel:camel-bom:${camel.jbang.version:4.18.1.redhat-00038}@pom
 //DEPS org.apache.camel:camel-jbang-core:${camel.jbang.version:4.18.1.redhat-00038}
-//DEPS org.apache.camel.kamelets:camel-kamelets:${camel-kamelets.version:4.18.1.redhat-00021}
+//DEPS org.apache.camel.kamelets:camel-kamelets:${camel-kamelets.version:4.18.1.redhat-00032}
 
 package main;
 

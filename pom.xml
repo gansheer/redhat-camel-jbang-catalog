@@ -64,7 +64,7 @@
         <camel-version>4.18.1.redhat-00038</camel-version>
         <camel-community-version>4.18.1</camel-community-version>
         <camel-spring-boot-version>4.18.1.redhat-00026</camel-spring-boot-version>
-        <camel-kamelets-version>4.18.1.redhat-00021</camel-kamelets-version>
+        <camel-kamelets-version>4.18.1.redhat-00032</camel-kamelets-version>
     </properties>
 
     <dependencyManagement>
