@@ -25,10 +25,6 @@
 
 package main;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.camel.dsl.jbang.core.commands.CamelJBangMain;
 
 /**
@@ -36,46 +32,9 @@ import org.apache.camel.dsl.jbang.core.commands.CamelJBangMain;
  */
 public class CamelJBang {
 
-    private static final String REDHAT_GA_REPO = "https://maven.repository.redhat.com/ga/";
-    private static final Set<String> SIMPLE_COMMANDS = Set.of("export", "run", "init");
-    private static final Map<String, Set<String>> SUB_COMMANDS = Map.of(
-            "catalog", Set.of(),
-            "update", Set.of(),
-            "version", Set.of("list", "set"),
-            "plugin", Set.of("add"),
-            "dependency", Set.of("runtime"),
-            "eval", Set.of("expression"),
-            "transform", Set.of("message"));
-
     public static void main(String... args) {
-        boolean hasRepos = Arrays.stream(args)
-                .anyMatch(a -> a.startsWith("--repos=") || a.startsWith("--repo="));
-        if (!hasRepos) {
-            int insertPos = findReposInsertPosition(args);
-            if (insertPos >= 0) {
-                String[] newArgs = new String[args.length + 1];
-                System.arraycopy(args, 0, newArgs, 0, insertPos);
-                newArgs[insertPos] = "--repos=" + REDHAT_GA_REPO;
-                System.arraycopy(args, insertPos, newArgs, insertPos + 1, args.length - insertPos);
-                args = newArgs;
-            }
-        }
+        System.setProperty("camel.jbang.repos", "https://maven.repository.redhat.com/ga/");
         CamelJBangMain.run(args);
-    }
-
-    private static int findReposInsertPosition(String[] args) {
-        for (int i = 0; i < args.length; i++) {
-            if (SIMPLE_COMMANDS.contains(args[i])) {
-                return i + 1;
-            }
-            Set<String> subs = SUB_COMMANDS.get(args[i]);
-            if (subs != null && i + 1 < args.length && !args[i + 1].startsWith("-")) {
-                if (subs.isEmpty() || subs.contains(args[i + 1])) {
-                    return i + 2;
-                }
-            }
-        }
-        return -1;
     }
 
 }
