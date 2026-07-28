@@ -83,7 +83,7 @@ public class UpdateVersionsTest {
 
             final String mrrcUrl = "https://maven.repository.redhat.com/ga";
             final String quarkusRegistryBaseUrl = "https://registry.quarkus.redhat.com";
-            final ComparableVersion minimalCamelVersion = new ComparableVersion("4.14.0");
+            final ComparableVersion minimalCamelVersion = new ComparableVersion("4.18.0");
 
             final String remoteAlias = "upstream";
             final CredentialsProvider creds = new GitHubTokenCredentials(ghToken);
