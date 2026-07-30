@@ -36,7 +36,7 @@ import org.apache.camel.dsl.jbang.core.commands.CamelJBangMain;
  */
 public class CamelJBang {
 
-    private static final String REDHAT_GA_REPO = "redhat.ga=https://maven.repository.redhat.com/ga/";
+    private static final String REDHAT_GA_REPO = "https://maven.repository.redhat.com/ga/";
     private static final Set<String> SIMPLE_COMMANDS = Set.of("export", "run", "init");
     private static final Map<String, Set<String>> SUB_COMMANDS = Map.of(
             "catalog", Set.of(),
