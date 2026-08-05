@@ -61,6 +61,7 @@ public class CamelJBang {
                 args = newArgs;
             }
         }
+        System.setProperty("camel.jbang.repos", REDHAT_GA_REPO);
         CamelJBangMain.run(args);
     }
 
