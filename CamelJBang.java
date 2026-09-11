@@ -18,11 +18,11 @@
  */
 
 //JAVA 17+
-//REPOS central=https://repo1.maven.org/maven2,redhat.ga=https://maven.repository.redhat.com/ga/,indy=https://indy.corp.redhat.com/api/content/maven/group/static/
-//JAVA_OPTIONS -Dcamel.extra.repos=redhat.ga=https://maven.repository.redhat.com/ga/,indy=https://indy.corp.redhat.com/api/content/maven/group/static/
+//REPOS central=https://repo1.maven.org/maven2,redhat.ga=https://maven.repository.redhat.com/ga/,atlassian=https://packages.atlassian.com/maven-external/,indy=https://indy.corp.redhat.com/api/content/maven/group/static/
+//JAVA_OPTIONS -Dcamel.extra.repos=redhat.ga=https://maven.repository.redhat.com/ga/,atlassian=https://packages.atlassian.com/maven-external/,indy=https://indy.corp.redhat.com/api/content/maven/group/static/
 //JAVA_OPTIONS -Dcamel.jbang.camelSpringBootVersion=4.22.0.redhat-00012
 //DEPS org.apache.camel:camel-bom:${camel.jbang.version:4.22.0.redhat-00004}@pom
-//DEPS org.apache.camel:camel-jbang-core:${camel.jbang.version:4.22.0.redhat-00004}
+//DEPS org.apache.camel:camel-jbang-core:${camel.jbang.version:4.23.0-SNAPSHOT}
 //DEPS org.apache.camel.kamelets:camel-kamelets:${camel-kamelets.version:4.22.0.redhat-00003}
 
 package main;
