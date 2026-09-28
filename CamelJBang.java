@@ -18,8 +18,8 @@
  */
 
 //JAVA 17+
-//REPOS central=https://repo1.maven.org/maven2,redhat.ga=https://maven.repository.redhat.com/ga/
-//JAVA_OPTIONS -Dcamel.jbang.quarkusGroupId=com.redhat.quarkus.platform -Dcamel.jbang.quarkusArtifactId=quarkus-bom -Dcamel.extra.repos=redhat.ga=https://maven.repository.redhat.com/ga/
+//REPOS nexus=https://repo1.maven.org/maven2,redhat.ga=https://maven.repository.redhat.com/ga/,https://nexus-camel-qe.apps.int.prod-scale-spoke1-aws-us-east-1.itup.redhat.com/repository/fuse-all
+//JAVA_OPTIONS -Dcamel.jbang.quarkusGroupId=com.redhat.quarkus.platform -Dcamel.jbang.quarkusArtifactId=quarkus-bom -Dcamel.extra.repos=redhat.ga=https://maven.repository.redhat.com/ga/,nexus=https://nexus-camel-qe.apps.int.prod-scale-spoke1-aws-us-east-1.itup.redhat.com/repository/fuse-all
 //DEPS org.apache.camel:camel-bom:${camel.jbang.version:4.22.0.redhat-00002}@pom
 //DEPS org.apache.camel:camel-jbang-core:${camel.jbang.version:4.22.0.redhat-00002}
 //DEPS org.apache.camel.kamelets:camel-kamelets:${camel-kamelets.version:4.22.0.redhat-00001}
