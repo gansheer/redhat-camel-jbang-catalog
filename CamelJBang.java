@@ -19,10 +19,11 @@
 
 //JAVA 17+
 //REPOS nexus=https://nexus-camel-qe.apps.int.prod-scale-spoke1-aws-us-east-1.itup.redhat.com/repository/fuse-all
-//JAVA_OPTIONS -Dcamel.jbang.quarkusExtensionRegistryBaseUri=https://registry.quarkus.redhat.com -Dcamel.jbang.quarkusGroupId=com.redhat.quarkus.platform -Dcamel.jbang.quarkusArtifactId=quarkus-bom -Dcamel.extra.repos=nexus=https://nexus-camel-qe.apps.int.prod-scale-spoke1-aws-us-east-1.itup.redhat.com/repository/fuse-all
-//DEPS org.apache.camel:camel-bom:${camel.jbang.version:4.22.1.redhat-00004}@pom
-//DEPS org.apache.camel:camel-jbang-core:${camel.jbang.version:4.22.1.redhat-00004}
-//DEPS org.apache.camel.kamelets:camel-kamelets:${camel-kamelets.version:4.22.1.redhat-00004}
+//JAVA_OPTIONS -Dcamel.jbang.quarkusArtifactId=quarkus-bom -Dcamel.extra.repos=nexus=https://nexus-camel-qe.apps.int.prod-scale-spoke1-aws-us-east-1.itup.redhat.com/repository/fuse-all
+//JAVA_OPTIONS -Dcamel.jbang.camelSpringBootVersion=4.22.1.redhat-00010
+//DEPS org.apache.camel:camel-bom:${camel.jbang.version:4.22.1.redhat-00006}@pom
+//DEPS org.apache.camel:camel-jbang-core:${camel.jbang.version:4.22.1.redhat-00006}
+//DEPS org.apache.camel.kamelets:camel-kamelets:${camel-kamelets.version:4.22.1.redhat-00006}
 
 package main;
 
